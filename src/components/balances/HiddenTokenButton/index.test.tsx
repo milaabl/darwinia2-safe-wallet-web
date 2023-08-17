@@ -83,6 +83,11 @@ describe('HiddenTokenToggle', () => {
             },
             rpc: {},
           },
+          signing: {
+            onChainSigning: false,
+          },
+          transactionExecution: true,
+          addressEmojis: false,
         },
       },
     })

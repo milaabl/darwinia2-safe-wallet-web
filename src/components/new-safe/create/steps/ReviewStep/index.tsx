@@ -15,8 +15,6 @@ import { getReadOnlyFallbackHandlerContract } from '@/services/contracts/safeCon
 import { computeNewSafeAddress } from '@/components/new-safe/create/logic'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3 } from '@/hooks/wallets/web3'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { type PendingSafeData, SAFE_PENDING_CREATION_STORAGE_KEY } from '@/components/new-safe/create/steps/StatusStep'
 import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCreationStep'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -26,6 +24,8 @@ import { ExecutionMethodSelector, ExecutionMethod } from '@/components/tx/Execut
 import { useLeastRemainingRelays } from '@/hooks/useRemainingRelays'
 import classnames from 'classnames'
 import { hasRemainingRelays } from '@/utils/relaying'
+import { BigNumber } from 'ethers'
+import { usePendingSafe } from '../StatusStep/usePendingSafe'
 
 const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafeFormData>) => {
   const isWrongChain = useIsWrongChain()
@@ -33,9 +33,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const chain = useCurrentChain()
   const wallet = useWallet()
   const provider = useWeb3()
-  const { maxFeePerGas, maxPriorityFeePerGas } = useGasPrice()
+  const [gasPrice] = useGasPrice()
   const saltNonce = useMemo(() => Date.now(), [])
-  const [_, setPendingSafe] = useLocalStorage<PendingSafeData | undefined>(SAFE_PENDING_CREATION_STORAGE_KEY)
+  const [_, setPendingSafe] = usePendingSafe()
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
   const ownerAddresses = useMemo(() => data.owners.map((owner) => owner.address), [data.owners])
@@ -55,9 +55,20 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const { gasLimit } = useEstimateSafeCreationGas(safeParams)
 
+  const maxFeePerGas = gasPrice?.maxFeePerGas
+  const maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas
+
   const totalFee =
-    gasLimit && maxFeePerGas && maxPriorityFeePerGas
-      ? formatVisualAmount(maxFeePerGas.add(maxPriorityFeePerGas).mul(gasLimit), chain?.nativeCurrency.decimals)
+    gasLimit && maxFeePerGas
+      ? formatVisualAmount(
+          maxFeePerGas
+            .add(
+              // maxPriorityFeePerGas is undefined if EIP-1559 disabled
+              maxPriorityFeePerGas || BigNumber.from(0),
+            )
+            .mul(gasLimit),
+          chain?.nativeCurrency.decimals,
+        )
       : '> 0.001'
 
   const handleBack = () => {

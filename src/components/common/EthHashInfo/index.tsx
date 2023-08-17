@@ -1,38 +1,49 @@
 import { type ReactElement } from 'react'
-import { EthHashInfo } from '@safe-global/safe-react-components'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import { selectChainById } from '@/store/chainsSlice'
+import { getBlockExplorerLink } from '@/utils/chains'
+import SrcEthHashInfo, { type EthHashInfoProps } from './SrcEthHashInfo'
+import { selectAddedSafes } from '@/store/addedSafesSlice'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
-import { getBlockExplorerLink } from '../../../utils/chains'
-
-import type { EthHashInfoProps } from '@safe-global/safe-react-components'
-
-const PrefixedEthHashInfo = ({
+const EthHashInfo = ({
   showName = true,
+  avatarSize = 44,
   ...props
 }: EthHashInfoProps & { showName?: boolean }): ReactElement => {
   const settings = useAppSelector(selectSettings)
   const currentChainId = useChainId()
+  const safeAddress = useSafeAddress()
+  const addedSafes = useAppSelector((state) => selectAddedSafes(state, currentChainId)) || {}
   const chain = useAppSelector((state) => selectChainById(state, props.chainId || currentChainId))
   const addressBook = useAddressBook()
   const link = chain ? getBlockExplorerLink(chain, props.address) : undefined
   const name = showName ? props.name || addressBook[props.address] : undefined
+  const showEmoji =
+    settings.addressEmojis &&
+    props.showAvatar !== false &&
+    !props.customAvatar &&
+    avatarSize >= 20 &&
+    (safeAddress === props.address || props.address in addedSafes)
 
   return (
-    <EthHashInfo
+    <SrcEthHashInfo
       prefix={chain?.shortName}
       showPrefix={settings.shortName.show}
       copyPrefix={settings.shortName.copy}
       {...props}
       name={name}
+      customAvatar={props.customAvatar}
       ExplorerButtonProps={{ title: link?.title || '', href: link?.href || '' }}
+      avatarSize={avatarSize}
+      showEmoji={showEmoji}
     >
       {props.children}
-    </EthHashInfo>
+    </SrcEthHashInfo>
   )
 }
 
-export default PrefixedEthHashInfo
+export default EthHashInfo

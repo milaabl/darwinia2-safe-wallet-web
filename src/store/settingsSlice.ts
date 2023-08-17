@@ -38,9 +38,14 @@ export type SettingsState = {
     darkMode?: boolean
   }
   env: EnvState
+  signing: {
+    onChainSigning: boolean
+  }
+  transactionExecution: boolean
+  addressEmojis: boolean
 }
 
-const initialState: SettingsState = {
+export const initialState: SettingsState = {
   currency: 'usd',
 
   tokenList: TOKEN_LISTS.TRUSTED,
@@ -60,6 +65,11 @@ const initialState: SettingsState = {
       accessToken: '',
     },
   },
+  signing: {
+    onChainSigning: false,
+  },
+  transactionExecution: true,
+  addressEmojis: false,
 }
 
 export const settingsSlice = createSlice({
@@ -78,8 +88,14 @@ export const settingsSlice = createSlice({
     setQrShortName: (state, { payload }: PayloadAction<SettingsState['shortName']['qr']>) => {
       state.shortName.qr = payload
     },
+    setTransactionExecution: (state, { payload }: PayloadAction<SettingsState['transactionExecution']>) => {
+      state.transactionExecution = payload
+    },
     setDarkMode: (state, { payload }: PayloadAction<SettingsState['theme']['darkMode']>) => {
       state.theme.darkMode = payload
+    },
+    setAddressEmojis: (state, { payload }: PayloadAction<SettingsState['addressEmojis']>) => {
+      state.addressEmojis = payload
     },
     setHiddenTokensForChain: (state, { payload }: PayloadAction<{ chainId: string; assets: string[] }>) => {
       const { chainId, assets } = payload
@@ -88,8 +104,19 @@ export const settingsSlice = createSlice({
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
     },
-    setEnv: (state, { payload }: PayloadAction<EnvState>) => {
-      state.env = payload
+    setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
+      const { chainId, rpc } = payload
+      if (rpc) {
+        state.env.rpc[chainId] = rpc
+      } else {
+        delete state.env.rpc[chainId]
+      }
+    },
+    setTenderly: (state, { payload }: PayloadAction<EnvState['tenderly']>) => {
+      state.env.tenderly = merge({}, state.env.tenderly, payload)
+    },
+    setOnChainSigning: (state, { payload }: PayloadAction<boolean>) => {
+      state.signing.onChainSigning = payload
     },
     setSettings: (_, { payload }: PayloadAction<SettingsState>) => {
       // We must return as we are overwriting the entire state
@@ -105,9 +132,13 @@ export const {
   setCopyShortName,
   setQrShortName,
   setDarkMode,
+  setAddressEmojis,
   setHiddenTokensForChain,
   setTokenList,
-  setEnv,
+  setRpc,
+  setTenderly,
+  setOnChainSigning,
+  setTransactionExecution,
 } = settingsSlice.actions
 
 export const selectSettings = (state: RootState): SettingsState => state[settingsSlice.name]
@@ -128,4 +159,8 @@ export const selectRpc = createSelector(selectSettings, (settings) => settings.e
 
 export const selectTenderly = createSelector(selectSettings, (settings) => settings.env.tenderly)
 
-export const isEnvInitialState = createSelector(selectSettings, (settings) => isEqual(settings.env, initialState.env))
+export const isEnvInitialState = createSelector([selectSettings, (_, chainId) => chainId], (settings, chainId) => {
+  return isEqual(settings.env.tenderly, initialState.env.tenderly) && !settings.env.rpc[chainId]
+})
+
+export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)

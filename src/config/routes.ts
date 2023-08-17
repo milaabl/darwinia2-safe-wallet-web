@@ -6,11 +6,10 @@ export const AppRoutes = {
   licenses: '/licenses',
   index: '/',
   imprint: '/imprint',
-  import: '/import',
   home: '/home',
-  environmentVariables: '/environment-variables',
   cookie: '/cookie',
   addressBook: '/address-book',
+  addOwner: '/addOwner',
   _offline: '/_offline',
   apps: {
     open: '/apps/open',
@@ -33,6 +32,7 @@ export const AppRoutes = {
     index: '/settings',
     environmentVariables: '/settings/environment-variables',
     data: '/settings/data',
+    cookies: '/settings/cookies',
     appearance: '/settings/appearance',
     safeApps: {
       index: '/settings/safe-apps',

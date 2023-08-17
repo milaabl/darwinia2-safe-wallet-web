@@ -100,7 +100,7 @@ const SafeList = ({ closeDrawer }: { closeDrawer?: () => void }): ReactElement =
   )
 
   return (
-    <div className={css.container}>
+    <div>
       <div className={css.header}>
         <Typography variant="h4" display="inline" fontWeight={700}>
           My Safe Accounts
@@ -159,7 +159,6 @@ const SafeList = ({ closeDrawer }: { closeDrawer?: () => void }): ReactElement =
       )}
 
       {!hasNoSafes &&
-        hasWallet &&
         configs.map((chain) => {
           const ownedSafesOnChain = ownedSafes[chain.chainId] ?? []
           const addedSafesOnChain = addedSafes[chain.chainId] ?? {}

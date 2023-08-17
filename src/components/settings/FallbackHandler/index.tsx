@@ -8,15 +8,13 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import AlertIcon from '@/public/images/common/alert.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getFallbackHandlerDeployment } from '@safe-global/safe-deployments'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { HelpCenterArticle, LATEST_SAFE_VERSION } from '@/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 
 import css from '../SafeModules/styles.module.css'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
-const FALLBACK_HANDLER_ARTICLE =
-  'https://help.gnosis-safe.io/en/articles/4738352-what-is-a-fallback-handler-and-how-does-it-relate-to-the-gnosis-safe'
 
 export const FallbackHandler = (): ReactElement | null => {
   const { safe } = useSafeInfo()
@@ -35,7 +33,8 @@ export const FallbackHandler = (): ReactElement | null => {
     return null
   }
 
-  const isOfficial = !!safe.fallbackHandler && safe.fallbackHandler.value === fallbackHandlerDeployment?.defaultAddress
+  const isOfficial =
+    !!safe.fallbackHandler && safe.fallbackHandler.value === fallbackHandlerDeployment?.networkAddresses[safe.chainId]
 
   const tooltip = !safe.fallbackHandler ? (
     <>
@@ -95,7 +94,7 @@ export const FallbackHandler = (): ReactElement | null => {
             <Typography>
               The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account
               contract. Learn more about the fallback handler{' '}
-              <ExternalLink href={FALLBACK_HANDLER_ARTICLE}>here</ExternalLink>
+              <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
             </Typography>
             {safe.fallbackHandler ? (
               <Box className={css.container}>

@@ -48,6 +48,10 @@ export const SETTINGS_EVENTS = {
       action: 'Dark mode',
       category: SETTINGS_CATEGORY,
     },
+    ADDRESS_EMOJIS: {
+      action: 'Toggle address emojis',
+      category: SETTINGS_CATEGORY,
+    },
   },
   MODULES: {
     REMOVE_MODULE: {
@@ -103,6 +107,12 @@ export const SETTINGS_EVENTS = {
   ENV_VARIABLES: {
     SAVE: {
       action: 'Environment variables changed',
+      category: SETTINGS_CATEGORY,
+    },
+  },
+  SAFE_APPS: {
+    CHANGE_SIGNING_METHOD: {
+      action: 'Safe apps signing method changed',
       category: SETTINGS_CATEGORY,
     },
   },
